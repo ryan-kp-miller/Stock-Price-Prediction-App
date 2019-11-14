@@ -29,8 +29,8 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 import os
-from util import get_data, plot_data
 import matplotlib.pyplot as plt
+import yfinance as yf
 
 
 def author():
@@ -69,15 +69,16 @@ def port_stats(prices):
 
 
 def compute_portvals(orders, start_val = 1000000, commission=9.95, impact=0.005):
-    #retrieving parameters for get_data() from orders df
-    start_date = orders.Date.min()
-    end_date = orders.Date.max()
-    dates = pd.date_range(start_date, end_date)
+    #retrieving parameters to pull data from orders df
+    sd = orders.index.min()
+    ed = orders.index.max()
     symbols = list(orders.Symbol.unique())
 
     #reading in adjusted close prices for the stocks in orders
-    prices = get_data(symbols, dates)
-    prices.drop(['SPY'], axis=1, inplace=True) #dropping SPY column
+    prices = yf.download(symbols[0], start=sd, end=ed,
+                     group_by="ticker", auto_adjust=True)
+    prices = prices.filter(items=['Close'],axis=1)
+    prices.columns = [symbols[0]]
     prices.fillna(method='ffill', inplace=True) #forward-filling missing prices
     prices.fillna(method='bfill', inplace=True) #back-filling missing prices
     prices['Cash'] = 1  #setting value of cash to 1
@@ -89,7 +90,7 @@ def compute_portvals(orders, start_val = 1000000, commission=9.95, impact=0.005)
     template = pd.DataFrame(index=market_dates, columns = symbols).replace(np.NaN,1)
 
     #creating trades dataframe with only dates where the market was open
-    trades = orders[orders.Date.isin(market_dates)]
+    trades = orders[orders.index.isin(market_dates)]
 
     #replacing BUY/SELL/HOLD with 1/-1/0 for easy computation
     trades.replace({'Order':{'BUY':1, 'SELL':-1, 'HOLD': 0}}, inplace=True)

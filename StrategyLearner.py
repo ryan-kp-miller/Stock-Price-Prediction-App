@@ -26,9 +26,8 @@ GT User ID: rmiller327
 GT ID: 903461824
 """
 
-import datetime as dt
 import pandas as pd
-import util as ut
+import yfinance as yf
 from BagLearner import BagLearner
 from RTLearner import RTLearner
 from indicators import *
@@ -39,13 +38,10 @@ class StrategyLearner(object):
         self.verbose = verbose
         self.impact = impact
         #setting n attribute for creating indicators for training learner
-        self.n = n   #using 9 because this is what i used for my manual strategy
+        self.n = n
         #initializing ML regressor as attribute and setting hyper-parameters
         self.learner = BagLearner(learner=RTLearner,
                                   kwargs={'leaf_size':leaf_size}, bags=bags)
-
-    def author(self):
-        return "rmiller327"
 
     def generate_indicators(self, prices):
         """
@@ -76,17 +72,18 @@ class StrategyLearner(object):
 
             inputs:
                 symbol: string representing the stock symbol for trading
-                sd:     datetime object representing the date to start trading
-                ed:     datetime object representing the date to stop trading
+                sd:     string representing the date to start trading
+                ed:     string representing the date to stop trading
 
             output:
                 prices: dataframe containing the preprocessed daily price data
                         for the given stock
         """
         #reading in the stock data using util.py and removing nulls
-        dates = pd.date_range(sd, ed)
-        prices = ut.get_data([symbol], dates)
-        prices.drop(['SPY'], axis=1, inplace=True) #dropping SPY column
+        df = yf.download(symbol, start=sd, end=ed,
+                         group_by="ticker", auto_adjust=True)
+        prices = df.filter(items=['Close'],axis=1)
+        prices.columns = [symbol]
         prices.fillna(method='ffill', inplace=True) #forward-filling missing prices
         prices.fillna(method='bfill', inplace=True) #back-filling missing prices
         return prices
@@ -109,23 +106,23 @@ class StrategyLearner(object):
         orders_df.loc[orders_df[symbol] > 0 ,'Order'] = 'BUY'
         orders_df.loc[orders_df[symbol] < 0 ,'Order'] = 'SELL'
         orders_df.loc[orders_df[symbol] == 0 ,'Order'] = 'HOLD'
-        orders_df['Date'] = orders_df.index.values
+        # orders_df['Date'] = orders_df.index.values
         orders_df['Shares'] = abs(orders_df.iloc[:,0].values)
         orders_df['Symbol'] = symbol
         orders_df.drop([symbol],axis=1,inplace=True)
         return orders_df
 
     # this method should train a Random Forest Regressor for trading
-    def addEvidence(self, symbol = "IBM", sd=dt.datetime(2008,1,1),
-                    ed=dt.datetime(2009,1,1), sv = 10000):
+    def addEvidence(self, symbol = "IBM", sd = "2008-01-01",
+                    ed = "2009-01-01", sv = 10000):
         """
             method for training a Random Forest regressor for predicting the
             price of the given stock
 
             inputs:
                 symbol: string representing the stock symbol to trade
-                sd:     datetime object representing the date to start trading
-                ed:     datetime object representing the date to stop trading
+                sd:     string representing the date to start trading
+                ed:     string representing the date to stop trading
                 sv:     integer representing the starting amount of money you
                         have to trade with
             output:
@@ -139,16 +136,16 @@ class StrategyLearner(object):
         self.learner.addEvidence(features_df.values, prices.values)
 
     # this method should use the existing policy and test it against new data
-    def testPolicy(self, symbol = "IBM", sd = dt.datetime(2009,1,1),
-                   ed = dt.datetime(2010,1,1), sv = 10000):
+    def testPolicy(self, symbol = "IBM", sd = "2009-01-01",
+                   ed = "2010-01-01", sv = 10000):
         """
             method for using the trained Random Forest regressor to create a
             dataframe of stock trades for the given time period and stock
 
             inputs:
                 symbol:    string representing the stock symbol to trade
-                sd:        datetime object representing the date to start trading
-                ed:        datetime object representing the date to stop trading
+                sd:        string representing the date to start trading
+                ed:        string representing the date to stop trading
                 sv:        integer representing the starting amount of money you
                            have to trade with
             output:
