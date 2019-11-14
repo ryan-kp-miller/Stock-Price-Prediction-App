@@ -13,7 +13,7 @@ def test_code(learner, orders_sl_df, sd, ed, symbol, sv, plot_title, plot_indica
     portvals_sl = compute_portvals(orders_sl_df, start_val = sv, commission=0.0, impact=0.005)
 
     prices['Strategy Learner'] = portvals_sl
-
+    prices['Predicted Price'] = learner.prices_pred
     plot_winnings(prices, plot_title, ["Strategy Learner",
                   "Prices"], [], [])
     adr,sddr,cr = port_stats(portvals_sl)
@@ -36,12 +36,12 @@ def test_code(learner, orders_sl_df, sd, ed, symbol, sv, plot_title, plot_indica
 
 def experiment3():
     #initializing objects
-    sl = StrategyLearner(impact=0.005)
+    sl = StrategyLearner(impact=0.005, leaf_size=20, bags=200)
     
     #in-sample parameters
-    symbol = "JPM"
+    symbol = "AAPL"
     sd = "2008-01-01"
-    ed = "2009-12-31"
+    ed = "2011-12-31"
 
     sv = 100000
     
@@ -58,7 +58,7 @@ def experiment3():
     
     #testing learner
     test_code(sl, orders_sl_df, sd, ed, symbol, sv,
-              "Strategy Learner vs Stock Price (in-sample)", False)
+              "Strategy Learner vs %s (in-sample)"%symbol, False)
     
     
     print()
@@ -66,15 +66,15 @@ def experiment3():
     print()
     
     #out-of-sample dates
-    sd = "2010-01-01"
-    ed = "2012-12-31"
+    sd = "2012-01-01"
+    ed = "2013-12-31"
 
     #creating StrategyLearner orders dataframe
     trades_sl_df = sl.testPolicy(symbol, sd, ed, sv)
     orders_sl_df = sl.generate_orders_df(trades_sl_df, symbol)
         
     test_code(sl, orders_sl_df, sd, ed, symbol, sv,
-              "Strategy Learner vs Stock Price (out-of-sample)", False)
+              "Strategy Learner vs %s (out-of-sample)"%symbol, False)
               
               
 if __name__ == "__main__":
