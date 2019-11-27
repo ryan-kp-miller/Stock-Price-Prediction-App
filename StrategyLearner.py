@@ -33,15 +33,14 @@ from RTLearner import RTLearner
 from indicators import *
 
 class StrategyLearner(object):
-    def __init__(self, verbose = False, impact = 0.0,
-                 n = 9, leaf_size = 10, bags = 150):
+    def __init__(self, learner, verbose = False,
+                 impact = 0.0, n = 9, kwargs = {}):
         self.verbose = verbose
         self.impact = impact
         #setting n attribute for creating indicators for training learner
         self.n = n
         #initializing ML regressor as attribute and setting hyper-parameters
-        self.learner = BagLearner(learner=RTLearner,
-                                  kwargs={'leaf_size':leaf_size}, bags=bags)
+        self.learner = learner(**kwargs)
 
     def generate_indicators(self, prices):
         """
@@ -64,6 +63,10 @@ class StrategyLearner(object):
         #creating features dataframe for training the regressor
         indicators_df = price_sma_df.join(bb_df,rsuffix="1").join(vol_df,rsuffix="2")
         indicators_df.columns = ["Price/SMA", "Bollinger Bands", "Volatility"]
+        
+        #adding column for the closing price of two days prior
+        indicators_df["Previous Price"] = prices.shift(2).values
+        
         return indicators_df
 
     def preprocess_data(self, symbol, sd, ed):
@@ -133,7 +136,7 @@ class StrategyLearner(object):
         #generating indicator dataframe for predicting
         features_df = self.generate_indicators(prices).fillna(method='bfill')
         #training regressor to predict prices using the indicators in indicators.py
-        self.learner.addEvidence(features_df.values, prices.values)
+        self.learner.fit(features_df.values, prices.values)
 
     # this method should use the existing policy and test it against new data
     def testPolicy(self, symbol = "IBM", sd = "2009-01-01",
@@ -157,9 +160,13 @@ class StrategyLearner(object):
 
         #generating indicator dataframe for predicting
         features_df = self.generate_indicators(prices)
+        
+        #removing the n days of blanks from prices and features_df
+        prices = prices.iloc[self.n:,:]
+        features_df = features_df.iloc[self.n:,:] 
 
         #predicting prices using Random Forest regressor
-        prices_array = self.learner.query(features_df.values)
+        prices_array = self.learner.predict(features_df.values)
         self.prices_pred = pd.DataFrame(prices_array,index=prices.index.values, columns=[symbol])
 
         #initializing df_trades to all 0s
@@ -181,20 +188,3 @@ class StrategyLearner(object):
                 current_holdings = -1000  #setting to current holdings
         return trades_df
 
-
-if __name__ == "__main__":
-    #running experiment 1
-    print()
-    print("######################  Experiment 1  ######################")
-    print()
-    from experiment1 import *
-    np.random.seed(12)
-    experiment1()
-
-    #running experiment 2
-    print()
-    print("######################  Experiment 2  ######################")
-    print()
-    from experiment2 import *
-    np.random.seed(12)
-    experiment2()
