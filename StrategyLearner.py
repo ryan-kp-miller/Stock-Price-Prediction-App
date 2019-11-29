@@ -31,16 +31,22 @@ import yfinance as yf
 from BagLearner import BagLearner
 from RTLearner import RTLearner
 from indicators import *
+from sklearn.preprocessing import StandardScaler
 
 class StrategyLearner(object):
-    def __init__(self, learner, verbose = False,
-                 impact = 0.0, n = 9, kwargs = {}):
+    def __init__(self, learner, verbose = False, impact = 0.0,
+                 n = 9, kwargs = {}, threshold = 0.1):
         self.verbose = verbose
         self.impact = impact
         #setting n attribute for creating indicators for training learner
         self.n = n
         #initializing ML regressor as attribute and setting hyper-parameters
         self.learner = learner(**kwargs)
+        self.ss = StandardScaler()
+        self.threshold = threshold
+        #counter variables to track the total number of trades and number of bad trades 
+        self.trades = 0
+        self.bad_trades = 0
 
     def generate_indicators(self, prices):
         """
@@ -64,8 +70,8 @@ class StrategyLearner(object):
         indicators_df = price_sma_df.join(bb_df,rsuffix="1").join(vol_df,rsuffix="2")
         indicators_df.columns = ["Price/SMA", "Bollinger Bands", "Volatility"]
         
-        #adding column for the closing price of two days prior
-        indicators_df["Previous Price"] = prices.shift(2).values
+        #adding column for the closing price of one days prior
+        indicators_df["Previous Price"] = prices.shift(1).values
         
         return indicators_df
 
@@ -133,10 +139,12 @@ class StrategyLearner(object):
         """
         #reading in the price data
         prices = self.preprocess_data(symbol, sd, ed)
+        #normalizing the prices
+        prices_norm = pd.DataFrame(self.ss.fit_transform(prices),index=prices.index, columns=[symbol])
         #generating indicator dataframe for predicting
-        features_df = self.generate_indicators(prices).fillna(method='bfill')
+        features_df = self.generate_indicators(prices_norm).fillna(method='bfill')
         #training regressor to predict prices using the indicators in indicators.py
-        self.learner.fit(features_df.values, prices.values)
+        self.learner.fit(features_df.values, prices_norm.values)
 
     # this method should use the existing policy and test it against new data
     def testPolicy(self, symbol = "IBM", sd = "2009-01-01",
@@ -155,36 +163,50 @@ class StrategyLearner(object):
                 df_trades: pandas dataframe containing a trade (int) for each
                            trading day between sd and ed
         """
-        #reading in the price data
+        #reading in the price data and normalizing it
         prices = self.preprocess_data(symbol, sd, ed)
-
+        prices_norm = pd.DataFrame(self.ss.transform(prices),index=prices.index, columns=[symbol])
+        
         #generating indicator dataframe for predicting
-        features_df = self.generate_indicators(prices)
+        features_df = self.generate_indicators(prices_norm)
         
         #removing the n days of blanks from prices and features_df
-        prices = prices.iloc[self.n:,:]
+        prices_norm = prices_norm.iloc[self.n:,:]
         features_df = features_df.iloc[self.n:,:] 
 
         #predicting prices using Random Forest regressor
         prices_array = self.learner.predict(features_df.values)
-        self.prices_pred = pd.DataFrame(prices_array,index=prices.index.values, columns=[symbol])
+        self.prices_pred = pd.DataFrame(prices_array,index=prices_norm.index.values, columns=[symbol])
 
         #initializing df_trades to all 0s
-        trades_df = prices.copy()
+        trades_df = prices_norm.copy()
         trades_df.iloc[:,0] = 0
 
         #looping through the trading days and buying/selling/holding based on
         #the next day's predicted stock price; keeping counter variable for
         #current holdings (current_holdings cannot exceed +/- 1000)
         current_holdings = 0
+        #resetting total trades and bad trades counter variables
+        self.trades = 0
+        self.bad_trades = 0
         #starting at trading day n because we cannot trade using backfilled data
         for i in range(self.n,trades_df.shape[0]-1):
             #buying/selling if price goes up/down, else holding
-            if self.prices_pred.iloc[i+1,0] > self.prices_pred.iloc[i,0]*(1+self.impact):  #price goes up
+            if self.prices_pred.iloc[i+1,0] > (1+self.threshold)*prices_norm.iloc[i,0]*(1+self.impact):  #price goes up
                 trades_df.iloc[i,0] = 1000 - current_holdings #buy as much as we can
                 current_holdings = 1000 #setting to current holdings
-            elif self.prices_pred.iloc[i+1,0] < self.prices_pred.iloc[i,0]*(1-self.impact):  #price goes down
+                #counting the total number of trades for later comparison
+                self.trades+=1
+                #counting the number of times the learner shouldn't have traded
+                if prices_norm.iloc[i+1,0] < prices_norm.iloc[i,0]:
+                    self.bad_trades+=1
+            elif self.prices_pred.iloc[i+1,0] < (1-self.threshold)*prices_norm.iloc[i,0]*(1-self.impact):  #price goes down
                 trades_df.iloc[i,0] = -1000 - current_holdings #sell as much as we can
-                current_holdings = -1000  #setting to current holdings
+                current_holdings = -1000  #setting to current  
+                #counting the total number of trades for later comparison
+                self.trades+=1
+                #counting the number of times the learner shouldn't have traded
+                if prices_norm.iloc[i+1,0] > prices_norm.iloc[i,0]:
+                    self.bad_trades+=1
         return trades_df
 
