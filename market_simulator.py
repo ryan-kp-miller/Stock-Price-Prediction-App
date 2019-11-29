@@ -1,30 +1,3 @@
-"""MC2-P1: Market simulator.
-
-Copyright 2018, Georgia Institute of Technology (Georgia Tech)
-Atlanta, Georgia 30332
-All Rights Reserved
-
-Template code for CS 4646/7646
-
-Georgia Tech asserts copyright ownership of this template and all derivative
-works, including solutions to the projects assigned in this course. Students
-and other users of this template code are advised not to share it with others
-or to make it available on publicly viewable websites including repositories
-such as github and gitlab.  This copyright statement should not be removed
-or edited.
-
-We do grant permission to share solutions privately with non-students such
-as potential employers. However, sharing with other current or future
-students of CS 7646 is prohibited and subject to being investigated as a
-GT honor code violation.
-
------do not edit anything above this line---
-
-Student Name: Ryan Miller
-GT User ID: rmiller327
-GT ID: 903461824
-"""
-
 import pandas as pd
 import numpy as np
 import datetime as dt
@@ -33,9 +6,27 @@ import matplotlib.pyplot as plt
 import yfinance as yf
 
 
-def author():
-    return 'rmiller327'
+def pull_prices(symbol, sd, ed):
+    """
+        helper method for reading in and preprocessing the prices data
 
+        inputs:
+            symbol: string representing the stock symbol for trading
+            sd:     string representing the date to start trading
+            ed:     string representing the date to stop trading
+
+        output:
+            prices: dataframe containing the preprocessed daily price data
+                    for the given stock
+    """
+    #reading in the stock data using util.py and removing nulls
+    df = yf.download(symbol, start=sd, end=ed,
+                     group_by="ticker", auto_adjust=True)
+    prices = df.filter(items=['Close'],axis=1)
+    prices.columns = [symbol]
+    prices.fillna(method='ffill', inplace=True) #forward-filling missing prices
+    prices.fillna(method='bfill', inplace=True) #back-filling missing prices
+    return prices
 
 #function for normalizing and plotting the given data
 def plot_winnings(df, plot_name, labels, long_list = [], short_list = []):
@@ -55,8 +46,7 @@ def plot_winnings(df, plot_name, labels, long_list = [], short_list = []):
     plt.xlabel("Time")
     plt.ylabel("Normalized Growth")
     plt.title(plot_name)
-    plt.savefig(plot_name+".png")  #saving the plot with the specified name
-    plt.clf()   #clearing the current figure
+    plt.show()
 
 
 #calculates average daily return and the standard deviation of daily returns
@@ -68,7 +58,7 @@ def port_stats(prices):
     return adr,sddr, cr
 
 
-def compute_portvals(orders, start_val = 1000000, commission=9.95, impact=0.005):
+def simulator(orders, start_val = 1000000, commission=9.95, impact=0.005):
     #retrieving parameters to pull data from orders df
     sd = orders.index.min()
     ed = orders.index.max()
