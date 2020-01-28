@@ -103,6 +103,8 @@ def create_plot(ticker, timeframe):
     #creating graph
     title = "{} Price over the last {}".format(ticker.upper(), timeframe)
     fig = px.line(prices_one, x="Date", y=ticker, title=title)
+    
+    #updating graph layout (docs: https://plot.ly/python/reference/#layout)
     fig["layout"].update(paper_bgcolor="#21252C", plot_bgcolor="#21252C",
                          title={'xanchor':'center', 'y':0.9, 'x':0.5,
                                 'font':{'color':'white'}},
