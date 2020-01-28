@@ -10,16 +10,20 @@ import yfinance as yf
 import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
-from market_simulator import pull_prices
+from market_simulator import pull_prices_viz
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-#initializing data and graph
-end_date = datetime.datetime.today().date()
-start_date = (end_date - relativedelta(days=5))
-prices = pull_prices("AAPL",start_date, end_date).reset_index()
+periods_dict = {"5 days":"5d", "1 month":"1mo", "3 months":"3mo", 
+                "6 months":"6mo", "1 year":"1y", "2 years":"2y", "5 years":"5y",
+                "10 years":"10y", "year to date":"ytd"}
 
+#reading in NYSE stock tickers
+tickers = pd.read_csv("yfinance_tickers.csv")
+
+#initializing data and graph
+prices = pull_prices_viz("AAPL", "5d")
 fig = px.line(prices, x="Date", y="AAPL",
               title="AAPL Price over the last 5 days")
 
@@ -35,35 +39,35 @@ app.layout = html.Div([
     ),
 
     html.Br(),
-
-    #text box 1
-    dcc.Input(
-        id="ticker",
-        type="text",
-        # placeholder="AAPL",
+    
+    #text box 2
+    dcc.Dropdown(
+        id='ticker',
+        options=[{'label': i, 'value': i} for i in tickers.Symbol],
         value="AAPL",
-    ),
+        style={'width':'50%'}),
 
     html.Br(),
 
     #text box 2
     dcc.Dropdown(
         id='timeframe',
-        options=[{'label': i, 'value': i} for i in ['5 days', '1 month', '1 year', '5 years']],
+        options=[{'label': i, 'value': i} for i in periods_dict.keys()],
         value="5 days",
         multi=False,
         placeholder="Time frame for plotting the stock price.",
         style={'width':'50%'}),
 
     # dcc.Dropdown()
+    html.Br(),
+    html.Br(),
+    html.Div(id='error-log'),
+    
 
     html.Br(),
-    html.Br(),
-    #puppy image to make things more visually pleasing
-    html.Div(id='start-date'),
-    html.Div(id='end-date'),
-
-    html.Br(),
+    
+    html.Div(id='company-name', children='Company: Apple, Inc.'),
+    
     html.Br(),
 
     dcc.Graph(
@@ -73,31 +77,47 @@ app.layout = html.Div([
 ])
 
 @app.callback(
-    [Output('start-date', 'children'),
-     Output('end-date', 'children'),
-     Output('prices-plot','figure')],
-    [Input('ticker','value'),
-     Input('timeframe','value')]
+    [Output('prices-plot', 'figure'),
+     Output('company-name', 'children'),
+     Output('error-log',   'children')],
+    [Input('ticker',       'value'),
+     Input('timeframe',    'value')],
+    [State('prices-plot',  'figure')]
 )
-def create_plot(ticker, timeframe):
-    #splitting time input
-    time_list = timeframe.split()
-    time_qty = int(time_list[0])
-    time_unit = time_list[1]
+def create_plot(ticker, timeframe, fig_old):
+    #retrieving the stock prices
+    period = periods_dict[timeframe]
+    prices = pull_prices_viz(ticker.upper(), period)
+    #only updating the figure if the prices were pulled correctly
+    if prices.shape[0] > 0:
+        title = "{} Price over the last {}".format(ticker.upper(), timeframe)
+        fig_new = px.line(prices, x="Date", y=ticker, title=title)
+        company_name = "Company: {}".format(tickers[tickers.Symbol == ticker].Name.values[0])
+        return fig_new, company_name, ""
 
-    #retrieving todays date
-    end_date = t = datetime.datetime.today() #.today()
-    if time_unit[:3] == "day":
-        start_date = end_date - relativedelta(days=time_qty)
-    elif time_unit[:5] == "month":
-        start_date = end_date - relativedelta(months=time_qty)
-    elif time_unit[:4] == "year":
-        start_date = end_date - relativedelta(years=time_qty)
-    prices = pull_prices(ticker, start_date.date(), end_date.date()).reset_index()
-    title = "{} Price over the last {}".format(ticker,timeframe)
-    fig = px.line(prices, x="Date", y=ticker,
-                  title=title)
-    return "Start date: {}".format(start_date.date()),"End date: {}".format(end_date.date()),fig
+# @app.callback(
+#     [Output('prices-plot', 'figure'),
+#      Output('error-log',   'children')],
+#     [Input('ticker',       'value'),
+#      Input('timeframe',    'value')],
+#     [State('prices-plot',  'figure')]
+# )
+# def create_plot(ticker, timeframe, fig_old):
+#     #only attempting to pull data if the stock ticker is over 2 characters long
+#     if len(ticker) <= 2 :
+#         return fig_old, "Incorrect stock ticker"
+#     else:  
+#         try:  
+#             #retrieving the stock prices
+#             period = periods_dict[timeframe]
+#             prices = pull_prices_viz(ticker.upper(), period)
+#             #only updating the figure if the prices were pulled correctly
+#             if prices.shape[0] > 0:
+#                 title = "{} Price over the last {}".format(ticker.upper(), timeframe)
+#                 fig_new = px.line(prices, x="Date", y=ticker, title=title)
+#                 return fig_new, ""
+#         except:
+#             return fig_old, "Incorrect stock ticker"
 
     #toggles puppy-image
     # @app.callback(
