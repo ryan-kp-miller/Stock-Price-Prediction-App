@@ -28,27 +28,25 @@ def pull_prices(symbol, sd, ed):
     prices.fillna(method='bfill', inplace=True) #back-filling missing prices
     return prices
     
-def pull_prices_viz(symbol, period):
+def pull_prices_viz(symbols, period="5y"):
     """
         helper method for reading in and preprocessing the prices data
 
         inputs:
-            symbol: string representing the stock symbol for trading
-            period: string representing the period of time to pull the stock 
-                    price for (e.g. "1m" for the last month)
+            symbols: string representing the stock symbols for trading
+            period:  string representing the period of time to pull the stock 
+                     price for (e.g. "1m" for the last month)
 
         output:
-            prices: dataframe containing the preprocessed daily price data
-                    for the given stock
+            prices:  dataframe containing the preprocessed daily price data
+                     for the given stock
     """
     #reading in the stock data using util.py and removing nulls
-    df = yf.download(symbol, period=period,
-                     group_by="ticker", auto_adjust=True)
-    prices = df.filter(items=['Close'],axis=1)
-    prices.columns = [symbol]
+    df = yf.download(symbols, period="5y", auto_adjust=True)
+    prices = df['Close'].reset_index()
     prices.fillna(method='ffill', inplace=True) #forward-filling missing prices
     prices.fillna(method='bfill', inplace=True) #back-filling missing prices
-    return prices.reset_index()
+    return prices
     
 
 #function for normalizing and plotting the given data
