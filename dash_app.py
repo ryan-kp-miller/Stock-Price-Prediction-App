@@ -14,8 +14,8 @@ from market_simulator import pull_prices_viz
 
 app = dash.Dash(name=__name__)
 
-periods_dict = {"5 days":"5d", "1 month":"1mo", "3 months":"3mo", 
-                "6 months":"6mo", "1 year":"1y", "2 years":"2y", "5 years":"5y"}
+periods_list = ["5 Days", "1 Month", "3 Months", "6 Months", 
+                "1 Year", "2 Years", "5 Years"]
 
 #reading in NYSE stock tickers
 tickers = pd.read_csv("yfinance_tickers.csv").iloc[:5,:]
@@ -27,38 +27,42 @@ prices = pull_prices_viz(tickers_str, "5y")
 app.title = "ML Stock Trader"
 app.layout = html.Div(className='main-body', children=[
     #Top-left div
-    html.Div(className='input-section', children=[
-        #header
-        dcc.Markdown(
-            """
-            # ML Stock Trader
-            """
-        ),
+    html.Div(id='card-outer', className='card-outer', children=[
+        html.Div(id='card-1', className='card', children=[
+            html.Br(),
+            #header
+            html.H3(className='header',children="ML Stock Trader"),
+            
+            #text box 2
+            html.Br(),
+            dcc.Dropdown(
+                id='ticker',
+                options=[{'label': i, 'value': i} for i in tickers.Symbol],
+                value="AAPL",
+            ),
         
-        #text box 2
-        html.Br(),
-        dcc.Dropdown(
-            id='ticker',
-            options=[{'label': i, 'value': i} for i in tickers.Symbol],
-            value="AAPL",
-            # style={'marmgin':'10px'}
+            #text box 2
+            html.Br(),
+            dcc.Dropdown(
+                id='timeframe',
+                options=[{'label': i, 'value': i} for i in periods_list],
+                value="5 Years",
+                multi=False,
+            ),
+            
+            html.Br(),
+            html.Div(id='company-name', children='Company: Apple, Inc.'),
+            html.Br(),
+            ],
         ),
     
-        #text box 2
-        html.Br(),
-        dcc.Dropdown(
-            id='timeframe',
-            options=[{'label': i, 'value': i} for i in periods_dict.keys()],
-            value="5 years",
-            multi=False,
-            placeholder="Time frame for plotting the stock price.",
-            # style={'margin':'10px'}
-        ),
-        
-        html.Br(),
-        html.Div(id='company-name', children='Company: Apple, Inc.'),
-        ],
-    ),
+        html.Div(id='card-2', className='card', children=[
+            html.H3(className='header', children="Stock Price Prediction Card")    
+        ]),
+        html.Div(id='card-3', className='card', children=[
+            html.H3(className='header', children="Sentiment Analysis Card") 
+        ]),
+    ]),
     
     html.Br(),
 
@@ -85,11 +89,11 @@ def create_plot(ticker, timeframe):
 
     #retrieving the start and end dates
     end_date =  datetime.datetime.today() #.today()
-    if t_unit[:3] == "day":
+    if t_unit[:3] == "Day":
         start_date = end_date - relativedelta(days=t_qty)
-    elif t_unit[:5] == "month":
+    elif t_unit[:5] == "Month":
         start_date = end_date - relativedelta(months=t_qty)
-    elif t_unit[:4] == "year":
+    else:
         start_date = end_date - relativedelta(years=t_qty)
     
     #filtering prices by start and end dates
@@ -97,13 +101,18 @@ def create_plot(ticker, timeframe):
     prices_one = prices_one.loc[mask]
     
     #creating graph
-    title = "{} Price over the last {}".format(ticker.upper(), "5 years")
-    fig_new = px.line(prices_one, x="Date", y=ticker, title=title)
+    title = "{} Price over the last {}".format(ticker.upper(), timeframe)
+    fig = px.line(prices_one, x="Date", y=ticker, title=title)
+    fig["layout"].update(paper_bgcolor="#21252C", plot_bgcolor="#21252C",
+                         title={'xanchor':'center', 'y':0.9, 'x':0.5,
+                                'font':{'color':'white'}},
+                         xaxis={'showgrid': False, 'color':'white'},
+                         yaxis={'showgrid': False, 'color':'white'})
     
     #creating Company Name string
     company_name = "Company: {}".format(tickers[tickers.Symbol == ticker].Name.values[0])
     
-    return fig_new, company_name
+    return fig, company_name
 
 
 
