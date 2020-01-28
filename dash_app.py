@@ -12,13 +12,8 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 from market_simulator import pull_prices_viz
 
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app = dash.Dash(name=__name__)
 
-#to allow app to use local css stylesheet
-# app.scripts.config.serve_locally=True
-# app.css.config.serve_locally=True
 periods_dict = {"5 days":"5d", "1 month":"1mo", "3 months":"3mo", 
                 "6 months":"6mo", "1 year":"1y", "2 years":"2y", "5 years":"5y"}
 
@@ -27,16 +22,10 @@ tickers = pd.read_csv("yfinance_tickers.csv").iloc[:5,:]
 tickers_str = ' '.join(tickers.Symbol.values)
 #initializing data and graph
 prices = pull_prices_viz(tickers_str, "5y")
-# fig = px.line(prices, x="Date", y="AAPL",
-#               title="AAPL Price over the last 5 days")
-
 
 #setting layout and title
 app.title = "ML Stock Trader"
 app.layout = html.Div(className='main-body', children=[
-    #linking local stylesheet to this Div
-    # html.Link(href='/assets/style.css', rel='stylesheet'),
-    
     #Top-left div
     html.Div(className='input-section', children=[
         #header
@@ -68,7 +57,6 @@ app.layout = html.Div(className='main-body', children=[
         
         html.Br(),
         html.Div(id='company-name', children='Company: Apple, Inc.'),
-        
         ],
     ),
     
@@ -78,7 +66,6 @@ app.layout = html.Div(className='main-body', children=[
             id='prices-plot',
             className="card-prices"
         )
-    
     ],
 )
 
