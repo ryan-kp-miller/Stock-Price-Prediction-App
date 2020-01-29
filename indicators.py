@@ -60,7 +60,7 @@ def volatility(prices, n):
                          trading day
     """
     daily_ret = prices/prices.shift(1) - 1
-    daily_ret.ix[0,:] = 0
+    daily_ret.iloc[0,:] = 0
     vol = daily_ret.rolling(window=n, min_periods=n).std()
     vol = (vol - vol.mean()) / vol.std()  #normalizing the indicator
     return vol
