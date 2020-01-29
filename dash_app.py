@@ -14,7 +14,7 @@ from market_simulator import pull_prices_viz
 
 app = dash.Dash(name=__name__)
 
-periods_list = ["5 Days", "1 Month", "3 Months", "6 Months", 
+periods_list = ["5 Days", "1 Month", "3 Months", "6 Months",
                 "1 Year", "2 Years", "5 Years"]
 
 #reading in NYSE stock tickers
@@ -28,53 +28,50 @@ app.title = "ML Stock Trader"
 app.layout = html.Div(className='main-body', children=[
     #Top-left div
     html.Div(id='card-outer', className='card-outer', children=[
-        html.Div(id='card-1', className='card', children=[
-            html.Br(),
+        html.Div(id='card-1', className='card-input', children=[
             #header
             html.H3(className='header',children="ML Stock Trader"),
-            
+
             #text box 2
-            html.Br(),
             dcc.Dropdown(
                 id='ticker',
+                className='dropdown',
                 options=[{'label': i, 'value': i} for i in tickers.Symbol],
                 value="AAPL",
             ),
-        
+
             #text box 2
             html.Br(),
             dcc.Dropdown(
                 id='timeframe',
+                className='dropdown',
                 options=[{'label': i, 'value': i} for i in periods_list],
                 value="5 Years",
                 multi=False,
             ),
-            
+
             html.Br(),
-            html.Div(id='company-name', children='Company: Apple, Inc.'),
-            html.Br(),
+            html.Div(id='company-name', children='Company: Apple Inc.',
+                     style={'text-align':'center'}),
             ],
         ),
-    
+
         html.Div(id='card-2', className='card', children=[
-            html.H3(className='header', children="Stock Price Prediction Card")    
+            html.H3(className='header', children="Stock Price Prediction Card")
         ]),
         html.Div(id='card-3', className='card', children=[
-            html.H3(className='header', children="Sentiment Analysis Card") 
+            html.H3(className='header', children="Sentiment Analysis Card")
         ]),
     ]),
-    
+
     html.Br(),
 
-    dcc.Graph(
-            id='prices-plot',
-            className="card-prices"
-        )
+    html.Div(id='prices-plot', style={'height':'50vh'}),
     ],
 )
 
 @app.callback(
-    [Output('prices-plot', 'figure'),
+    [Output('prices-plot', 'children'),
      Output('company-name', 'children')],
     [Input('ticker', 'value'),
      Input('timeframe', 'value')]
@@ -82,7 +79,7 @@ app.layout = html.Div(className='main-body', children=[
 def create_plot(ticker, timeframe):
     #filtering prices by selected stock
     prices_one = prices.filter(items=["Date",ticker],axis=1)
-    
+
     #splitting time input
     t_list = timeframe.split(' ')
     t_qty, t_unit = int(t_list[0]),t_list[1]
@@ -95,26 +92,30 @@ def create_plot(ticker, timeframe):
         start_date = end_date - relativedelta(months=t_qty)
     else:
         start_date = end_date - relativedelta(years=t_qty)
-    
+
     #filtering prices by start and end dates
     mask = (prices_one['Date'] >= start_date) & (prices_one['Date'] <= end_date)
     prices_one = prices_one.loc[mask]
-    
+
     #creating graph
     title = "{} Price over the last {}".format(ticker.upper(), timeframe)
     fig = px.line(prices_one, x="Date", y=ticker, title=title)
-    
+
     #updating graph layout (docs: https://plot.ly/python/reference/#layout)
     fig["layout"].update(paper_bgcolor="#21252C", plot_bgcolor="#21252C",
                          title={'xanchor':'center', 'y':0.9, 'x':0.5,
                                 'font':{'color':'white'}},
                          xaxis={'showgrid': False, 'color':'white'},
-                         yaxis={'showgrid': False, 'color':'white'})
-    
+                         yaxis={'showgrid': False, 'color':'white',
+                                'title':'Stock Price'})
+    g = dcc.Graph(
+            figure=fig,
+            className="card-prices",
+            style={'height':'inherit'},
+        ),
     #creating Company Name string
-    company_name = "Company: {}".format(tickers[tickers.Symbol == ticker].Name.values[0])
-    
-    return fig, company_name
+    company_name = tickers[tickers.Symbol == ticker].Name.values[0]
+    return g, "Company: \t{}".format(company_name)
 
 
 
