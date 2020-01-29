@@ -4,6 +4,7 @@ import yfinance as yf
 from indicators import *
 from sklearn.preprocessing import StandardScaler
 import datetime as dt
+import pickle
 
 class MLTrader:
     """
@@ -132,6 +133,24 @@ class MLTrader:
         features_df = self.generate_indicators(prices_norm).fillna(method='bfill')
         #training regressor to predict prices using the indicators in indicators.py
         self.learner.fit(features_df.values, prices_norm.values)
+
+    
+    def save_learner(self): 
+        """
+            method that saves the learner using pickle
+            assumes that the model is from scikit-learn 
+        """
+        pickle.dump(self.learner, open("model.p", "wb"))
+        pickle.dump(self.ss, open("ss.p", "wb"))
+
+        
+    def load_learner(self):
+        """
+            method that loads the learner using pickle
+            assumes that the model was saved using save_learner method 
+        """
+        self.learner = pickle.load(open("model.p", "rb"))
+        self.ss = pickle.load(open("ss.p", "rb"))
 
 
     def testLearner(self, symbol = "IBM", sd = "2009-01-01",
