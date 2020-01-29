@@ -66,12 +66,15 @@ app.layout = html.Div(className='main-body', children=[
 
     html.Br(),
 
-    html.Div(id='prices-plot', style={'height':'50vh'}),
+    html.Div(id='prices-div', style={'height':'50vh'},
+             children=dcc.Graph(id='prices-plot', style={'height':'inherit'},
+                                config={'responsive':True})),
     ],
 )
 
 @app.callback(
-    [Output('prices-plot', 'children'),
+    [Output('prices-plot', 'figure'),
+     Output('prices-div', 'style'),
      Output('company-name', 'children')],
     [Input('ticker', 'value'),
      Input('timeframe', 'value')]
@@ -107,16 +110,18 @@ def create_plot(ticker, timeframe):
                                 'font':{'color':'white'}},
                          xaxis={'showgrid': False, 'color':'white'},
                          yaxis={'showgrid': False, 'color':'white',
-                                'title':'Stock Price'})
-    g = dcc.Graph(
-            figure=fig,
-            className="card-prices",
-            style={'height':'inherit'},
-            config={'responsive':False}
-        )
+                                'title':'Stock Price'},
+                         height=350)
+    # g = dcc.Graph(
+    #         figure=fig,
+    #         className="card-prices",
+    #         style={'height':'inherit'},
+    #         config={'responsive':False}
+    #     )
+
     #creating Company Name string
     company_name = tickers[tickers.Symbol == ticker].Name.values[0]
-    return g, "Company: \t{}".format(company_name)
+    return fig, {'height':'50vh'}, "Company: \t{}".format(company_name)
 
 
 
