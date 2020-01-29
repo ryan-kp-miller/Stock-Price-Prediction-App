@@ -112,7 +112,8 @@ def create_plot(ticker, timeframe):
             figure=fig,
             className="card-prices",
             style={'height':'inherit'},
-        ),
+            config={'responsive':False}
+        )
     #creating Company Name string
     company_name = tickers[tickers.Symbol == ticker].Name.values[0]
     return g, "Company: \t{}".format(company_name)

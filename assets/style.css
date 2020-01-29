@@ -1,13 +1,7 @@
 body
 {
     background-color : #0d0d0d;
-    /* height : 100vh; */
 }
-
-/* .main-body
-{
-    height : 100vh;
-} */
 
 .card-outer
 {
@@ -39,7 +33,6 @@ body
     color : white;
     margin : 1%;
     padding: 2%;
-    /* display:inline-block; */
     display: table-cell;
     background-color : #30333d;
 }
@@ -47,7 +40,7 @@ body
 .card-prices
 {
     width : 90%;
-    height : 50%;
+    height : 50vh;
     color : white;
     padding: 10px;
     margin : 0 auto;
