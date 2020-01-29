@@ -74,7 +74,6 @@ app.layout = html.Div(className='main-body', children=[
 
 @app.callback(
     [Output('prices-plot', 'figure'),
-     Output('prices-div', 'style'),
      Output('company-name', 'children')],
     [Input('ticker', 'value'),
      Input('timeframe', 'value')]
@@ -121,7 +120,7 @@ def create_plot(ticker, timeframe):
 
     #creating Company Name string
     company_name = tickers[tickers.Symbol == ticker].Name.values[0]
-    return fig, {'height':'50vh'}, "Company: \t{}".format(company_name)
+    return fig, "Company: \t{}".format(company_name)
 
 
 
