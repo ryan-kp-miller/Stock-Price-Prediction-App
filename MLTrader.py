@@ -154,19 +154,20 @@ class MLTrader:
         self.ss = load("models/{}_ss.joblib".format(symbol))
 
 
-    def predict_tomorrow(self, symbol):
+    def predict_today(self, symbol):
         """
-            method to predict the the adjusted close stock price
+            method to predict the adjusted closing stock price for today
 
             input:
                 symbol: string representing the stock symbol for trading
 
             output:
-                price:  float representing tomorrow's predicted stock price
+                price:  float representing today's predicted closing stock price
                         for the given symbol
         """
-        #finding the start_date based on the window-length
-        ed = dt.datetime.today()
+        #finding the start_date based on the 2*window-length to account for 
+        #days the market isn't open
+        ed = dt.datetime.today() - relativedelta(days=1)
         sd = ed - relativedelta(days=self.n*2)
 
         #reading in the prices data and normalizing it

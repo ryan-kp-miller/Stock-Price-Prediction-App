@@ -43,6 +43,12 @@ def pull_prices_viz(symbols, period="5y"):
     """
     #reading in the stock data using util.py and removing nulls
     df = yf.download(symbols, period="5y", auto_adjust=True)
+    
+    #dropping "today's closing price" 
+    #(at run-time, there typically won't be a closing price for today)
+    df = df.iloc[:-1,:]
+    
+    #pushing date from the index to a column and filling NaNs
     prices = df['Close'].reset_index()
     prices.fillna(method='ffill', inplace=True) #forward-filling missing prices
     prices.fillna(method='bfill', inplace=True) #back-filling missing prices
