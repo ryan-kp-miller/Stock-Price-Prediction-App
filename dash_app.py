@@ -57,14 +57,14 @@ app.layout = html.Div(className='main-body', children=[
         ),
 
         html.Div(id='card-2', className='card', children=[
-            html.H3(className='header', children="Stock Price Prediction Card"),
+            html.H3(className='header', children="Stock Price Prediction"),
             html.Div(id="current-price",style={'color':'white',
                                                'textAlign':'center'}),
             html.Br(),
             html.Div(id="predicted-price"),
         ]),
         html.Div(id='card-3', className='card', children=[
-            html.H3(className='header', children="Sentiment Analysis Card"),
+            html.H3(className='header', children="Sentiment Analysis"),
         ]),
     ]),
 
