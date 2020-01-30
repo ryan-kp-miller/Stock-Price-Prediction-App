@@ -28,7 +28,7 @@ body
 
 .card-input
 {
-    width : 25%;
+    width : 30%;
     height : 100%;
     color : white;
     margin : 1%;
@@ -52,7 +52,7 @@ body
     text-align : center;
     font : "Open Sans";
     font-size : 100%;
-    height : 40%;
+    height : 20%;
 }
 
 .dropdown
