@@ -34,10 +34,10 @@ app.layout = html.Div(className='main-body', children=[
 
             #text box 2
             dcc.Dropdown(
-                id='ticker',
+                id='company-name',
                 className='dropdown',
-                options=[{'label': i, 'value': i} for i in tickers.Symbol],
-                value="AAPL",
+                options=[{'label': i, 'value': i} for i in tickers.Name],
+                value=tickers.Name[0],
             ),
 
             #text box 2
@@ -51,7 +51,7 @@ app.layout = html.Div(className='main-body', children=[
             ),
 
             html.Br(),
-            html.Div(id='company-name', children='Company: Apple Inc.',
+            html.Div(id='company-ticker', children='Ticker: AAPL',
                      style={'textAlign':'center'}),
             ],
         ),
@@ -78,11 +78,14 @@ app.layout = html.Div(className='main-body', children=[
 
 @app.callback(
     [Output('prices-plot', 'figure'),
-     Output('company-name', 'children')],
-    [Input('ticker', 'value'),
+     Output('company-ticker', 'children')],
+    [Input('company-name', 'value'),
      Input('timeframe', 'value')]
 )
-def create_plot(ticker, timeframe):
+def create_plot(name, timeframe):
+    #retrieving stock ticker
+    ticker = tickers[tickers.Name == name].Symbol.values[0]
+
     #filtering prices by selected stock
     prices_one = prices.filter(items=["Date",ticker],axis=1)
 
@@ -118,16 +121,19 @@ def create_plot(ticker, timeframe):
 
     #creating Company Name string
     company_name = tickers[tickers.Symbol == ticker].Name.values[0]
-    return fig, "Company: \t{}".format(company_name)
+    return fig, "Stock Ticker: \t{}".format(ticker)
 
 
 @app.callback(
     [Output('current-price', 'children'),
      Output('predicted-price', 'children'),
      Output('predicted-price', 'style')],
-    [Input('ticker', 'value')]
+    [Input('company-name', 'value')]
 )
-def show_prices(ticker):
+def show_prices(name):
+    #retrieving stock ticker
+    ticker = tickers[tickers.Name == name].Symbol.values[0]
+
     #creating the trader and loading the given stock's model
     trader = MLTrader(None, n=10)
     trader.load_learner(ticker)
@@ -144,8 +150,8 @@ def show_prices(ticker):
     else:
         color = "white"
 
-    current_str = "Current Price: ${:.2f}".format(current_price)
-    predicted_str = "Tomorrow's Predicted Price: ${:.2f}".format(predicted_price)
+    current_str = "Current Price: ${:,.2f}".format(current_price)
+    predicted_str = "Tomorrow's Predicted Price: ${:,.2f}".format(predicted_price)
     predicted_style = {'color':color, 'textAlign':'center'}
     return current_str,predicted_str,predicted_style
 
