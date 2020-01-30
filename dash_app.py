@@ -140,7 +140,7 @@ def show_prices(name):
 
     #getting the current stock price and predicting tomorrow's price
     current_price = round(prices[ticker].values[-1],2)
-    predicted_price = round(trader.predict_tomorrow(ticker),2)
+    predicted_price = round(trader.predict_today(ticker),2)
 
     #deciding if the predicted price is higher or lower than the current price
     if predicted_price > current_price:
@@ -150,8 +150,8 @@ def show_prices(name):
     else:
         color = "white"
 
-    current_str = "Current Price: ${:,.2f}".format(current_price)
-    predicted_str = "Tomorrow's Predicted Price: ${:,.2f}".format(predicted_price)
+    current_str = "Yesterday's Closing Price: ${:,.2f}".format(current_price)
+    predicted_str = "Today's Predicted Closing Price: ${:,.2f}".format(predicted_price)
     predicted_style = {'color':color, 'textAlign':'center'}
     return current_str,predicted_str,predicted_style
 
