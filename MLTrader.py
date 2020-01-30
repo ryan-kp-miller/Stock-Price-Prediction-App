@@ -23,7 +23,7 @@ class MLTrader:
     """
 
     def __init__(self, learner, impact = 0.0, n = 9, kwargs = {}):
-        self.learner = learner(**kwargs)
+        self.learner = None if learner is None else learner(**kwargs)
         self.impact = impact
         self.n = n
         #storing sklearn's standard scaler for scaling the train and test prices
