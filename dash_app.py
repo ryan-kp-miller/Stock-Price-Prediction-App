@@ -18,7 +18,7 @@ periods_list = ["5 Days", "1 Month", "3 Months", "6 Months",
                 "1 Year", "2 Years", "5 Years"]
 
 #reading in NYSE stock tickers
-tickers = pd.read_csv("yfinance_tickers.csv").iloc[:5,:]
+tickers = pd.read_csv("yfinance_tickers.csv")
 tickers_str = ' '.join(tickers.Symbol.values)
 #initializing data and graph
 prices = pull_prices_viz(tickers_str, "5y")
