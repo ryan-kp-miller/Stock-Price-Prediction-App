@@ -26,63 +26,56 @@ prices = pull_prices_viz(tickers_str, "5y")
 #setting layout and title
 app.title = "Stock Prediction App"
 app.layout = html.Div(className='main-body', children=[
-    #Top-left div
-    html.Div(id='card-outer', className='card-outer', children=[
-        html.Div(id='card-1', className='card-intro', children=[
-            html.H3(className='header', children="Stock Prediction App"),
-            dcc.Markdown(className='intro', children="""
-                This app is designed to show you the adjusted closing stock 
-                prices of a few different technology companies. Select the
-                company you want to see, and the chart below will show it's 
-                stock price over the last five years. In the top-right corner of
-                the screen, the company's stock ticker, adjusted closing price 
-                from yesterday, and the predicted closing price for today.                          
-            """)
-        ]),
-    
-        html.Div(id='card-2', className='card', children=[
-            #header
-            html.H3(className='header',children="Inputs"),
-
-            #text box 1
-            html.Div(className='dropdown-title', children='Company Name:'),
-            dcc.Dropdown(
-                id='company-name',
-                className='dropdown',
-                options=[{'label': i, 'value': i} for i in tickers.Name],
-                value=tickers.Name[0],
-            ),
-            
-            html.Br(),
-
-            #text box 2
-            html.Div(className='dropdown-title', children='Graph Filter:'),
-            dcc.Dropdown(
-                id='timeframe',
-                className='dropdown',
-                options=[{'label': i, 'value': i} for i in periods_list],
-                value="5 Years",
-                multi=False,
-            )],
-        ),
-
-        html.Div(id='card-3', className='card', children=[
-            html.H3(className='header', children="Stock Price Prediction"),
-            html.Div(id='company-ticker', children='Ticker: AAPL',
-                     style={'textAlign':'center'}),
-            html.Br(),
-            html.Div(id="current-price",style={'color':'white',
-                                               'textAlign':'center'}),
-            html.Br(),
-            html.Div(id="predicted-price"),
-        ]),
+    #intro section on top
+    html.Div(id='title', className='title-div', children=[
+        html.H3(className='title', children="Stock Prediction App"),
+        dcc.Markdown(className='intro', children="""
+            This app is designed to show you the last five years' adjusted 
+            closing stock prices of a few different technology companies and 
+            predict the closing price for today. Play around and make some money!                          
+        """)
     ]),
+    html.Div(className='lower-body',children=[
+        #Top-left div
+        html.Div(id='card-left', className='card-left', children=[
+                #header
+                html.H3(className='header',children="Inputs"),
 
-    html.Div(id='prices-div', style={'height':'50vh'},
-             children=dcc.Graph(id='prices-plot', style={'height':'inherit'},
-                                config={'responsive':True})),
-    ],
-)
+                #text box 1
+                html.Div(className='dropdown-title', children='Company Name:'),
+                dcc.Dropdown(
+                    id='company-name',
+                    className='dropdown',
+                    options=[{'label': i, 'value': i} for i in tickers.Name],
+                    value=tickers.Name[0],
+                ),
+                
+                html.Br(),
+
+                #text box 2
+                html.Div(className='dropdown-title', children='Graph Filter:'),
+                dcc.Dropdown(
+                    id='timeframe',
+                    className='dropdown',
+                    options=[{'label': i, 'value': i} for i in periods_list],
+                    value="5 Years",
+                    multi=False,
+                ),
+
+                html.H3(className='header', children="Stock Price Prediction"),
+                html.Div(className='labels', id='company-ticker', 
+                         children='Ticker: AAPL'),
+                html.Br(),
+                html.Div(className='labels', id="current-price"),
+                html.Br(),
+                html.Div(className='labels', id="predicted-price"),
+            ]),
+
+        html.Div(className='card-prices', id='prices-div',
+                 children=dcc.Graph(id='prices-plot', style={'width':'100%'},
+                                    config={'responsive':True})),
+    ]),
+])
 
 @app.callback(
     Output('prices-plot', 'figure'),
@@ -118,7 +111,7 @@ def create_plot(name, timeframe):
     fig = px.line(prices_one, x="Date", y=ticker, title=title)
 
     #updating graph layout (docs: https://plot.ly/python/reference/#layout)
-    fig["layout"].update(paper_bgcolor="#21252C", plot_bgcolor="#21252C",
+    fig["layout"].update(paper_bgcolor="#0a2863", plot_bgcolor="#0a2863",
                          title={'xanchor':'center', 'y':0.9, 'x':0.5,
                                 'font':{'color':'white'}},
                          xaxis={'showgrid': False, 'color':'white'},

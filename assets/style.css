@@ -1,76 +1,85 @@
 body
 {
-    background-color : #0d0d0d;
+    background-color : #061E44;
 }
 
 h5
 {
-    height : 3%;
-    
+    height : 3%;    
 }
 
-.card-outer
+
+.title-div
 {
-    width : 95%;
-    height : 20vh;
-    padding: 10px;
+    width : 80%;
+    height : 10%;
+    color : white;
     margin : 0 auto;
+    padding: 2%;
+    background-color : #0a2863;
+}
+
+.lower-body
+{
     display : table;
-    border-collapse: separate;
+}
+
+
+.card-left
+{
+    width : 20%;
+    height : 100%;
+    padding: 10px;
+    color : white;
+    margin : 0 auto;
+    display: table-cell;
+    vertical-align : top;
     border-spacing: 10px;
-    background-color : #0d0d0d;
-}
-
-.card
-{
-    width : 33%;
-    height : 100%;
-    color : white;
-    margin : 1%;
-    padding: 2%;
-    display: table-cell;
-    background-color : #30333d;
-}
-
-.card-intro
-{
-    width : 40%;
-    height : 100%;
-    color : white;
-    margin : 1%;
-    padding: 2%;
-    display: table-cell;
-    background-color : #30333d;
+    border-collapse: separate;
+    background-color : #0a2863;
 }
 
 .card-prices
 {
-    width : 90%;
-    height : 50vh;
+    width : 50vh;
+    height : 100%;
     color : white;
     padding: 10px;
     margin : 0 auto;
-    background-color : #30333d;
+    display: table-cell;
+    border-collapse: separate;
+    background-color : #0a2863;
 }
 
 .header
 {
+    vertical-align : top;
     text-align : center;
     font : "Open Sans";
     font-size : 100%;
+    color : white;
     height : 5%;
+}
+
+.labels
+{
+    vertical-align : top;
+    text-align : center;
+    font : "Open Sans";
+    color : white;
 }
 
 .dropdown
 {
+    vertical-align : top;
     width : 80%;
     color : black;
     margin : 0 auto;
-    background-color : #30333d;
 }
 
 .dropdown-title
 {
+    vertical-align : top;
     width : 80%;
     color : white;
     text-align : left;
