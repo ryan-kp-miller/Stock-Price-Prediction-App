@@ -1,16 +1,13 @@
 Symbol,Name
-AAPL,Apple Inc.
-MSFT,Microsoft Corporation
-GOOG,Alphabet Inc.
-AMZN,"Amazon.com, Inc."
-FB,"Facebook, Inc."
-BABA,Alibaba Group Holding Limited
-INTC,Intel Corporation
-CRM,"salesforce.com, inc."
-NVDA,NVIDIA Corporation
-PYPL,"PayPal Holdings, Inc."
-TSLA,"Tesla, Inc."
-AMD,"Advanced Micro Devices, Inc."
-ATVI,"Activision Blizzard, Inc."
-EA,Electronic Arts Inc.
-YELP,Yelp Inc.
+AAPL,Apple
+MSFT,Microsoft
+GOOG,Google
+AMZN,Amazon
+FB,Facebook
+BABA,Alibaba
+INTC,Intel
+CRM,Salesforce
+NVDA,NVIDIA
+PYPL,PayPal
+TSLA,Tesla
+YELP,Yelp
