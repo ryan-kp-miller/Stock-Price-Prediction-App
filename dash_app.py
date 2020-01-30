@@ -5,12 +5,12 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 import plotly.express as px
 
-from MLTrader import MLTrader
-import yfinance as yf
-import datetime
-from dateutil.relativedelta import relativedelta
 import pandas as pd
+import datetime as dt
+import yfinance as yf
+from MLTrader import MLTrader
 from market_simulator import pull_prices_viz
+from dateutil.relativedelta import relativedelta
 
 app = dash.Dash(name=__name__)
 
@@ -52,15 +52,19 @@ app.layout = html.Div(className='main-body', children=[
 
             html.Br(),
             html.Div(id='company-name', children='Company: Apple Inc.',
-                     style={'text-align':'center'}),
+                     style={'textAlign':'center'}),
             ],
         ),
 
         html.Div(id='card-2', className='card', children=[
-            html.H3(className='header', children="Stock Price Prediction Card")
+            html.H3(className='header', children="Stock Price Prediction Card"),
+            html.Div(id="current-price",style={'color':'white',
+                                               'textAlign':'center'}),
+            html.Br(),
+            html.Div(id="predicted-price"),
         ]),
         html.Div(id='card-3', className='card', children=[
-            html.H3(className='header', children="Sentiment Analysis Card")
+            html.H3(className='header', children="Sentiment Analysis Card"),
         ]),
     ]),
 
@@ -87,7 +91,7 @@ def create_plot(ticker, timeframe):
     t_qty, t_unit = int(t_list[0]),t_list[1]
 
     #retrieving the start and end dates
-    end_date =  datetime.datetime.today() #.today()
+    end_date =  dt.datetime.today() #.today()
     if t_unit[:3] == "Day":
         start_date = end_date - relativedelta(days=t_qty)
     elif t_unit[:5] == "Month":
@@ -111,17 +115,39 @@ def create_plot(ticker, timeframe):
                          yaxis={'showgrid': False, 'color':'white',
                                 'title':'Stock Price'},
                          height=350)
-    # g = dcc.Graph(
-    #         figure=fig,
-    #         className="card-prices",
-    #         style={'height':'inherit'},
-    #         config={'responsive':False}
-    #     )
 
     #creating Company Name string
     company_name = tickers[tickers.Symbol == ticker].Name.values[0]
     return fig, "Company: \t{}".format(company_name)
 
+
+@app.callback(
+    [Output('current-price', 'children'),
+     Output('predicted-price', 'children'),
+     Output('predicted-price', 'style')],
+    [Input('ticker', 'value')]
+)
+def show_prices(ticker):
+    #creating the trader and loading the given stock's model
+    trader = MLTrader(None, n=10)
+    trader.load_learner(ticker)
+
+    #getting the current stock price and predicting tomorrow's price
+    current_price = round(prices[ticker].values[-1],2)
+    predicted_price = round(trader.predict_tomorrow(ticker),2)
+
+    #deciding if the predicted price is higher or lower than the current price
+    if predicted_price > current_price:
+        color = "green"
+    elif predicted_price < current_price:
+        color = "red"
+    else:
+        color = "white"
+
+    current_str = "Current Price: ${:.2f}".format(current_price)
+    predicted_str = "Tomorrow's Predicted Price: ${:.2f}".format(predicted_price)
+    predicted_style = {'color':color, 'textAlign':'center'}
+    return current_str,predicted_str,predicted_style
 
 
 if __name__ == "__main__":
