@@ -176,7 +176,6 @@ class MLTrader:
 
         #generating indicator dataframe for predicting
         features_df = self.generate_indicators(prices_norm)
-        print(features_df.shape)
 
         #removing the n days of blanks from prices and features_df
         prices_norm = prices_norm.iloc[self.n:,:]
