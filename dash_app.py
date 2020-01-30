@@ -24,24 +24,31 @@ tickers_str = ' '.join(tickers.Symbol.values)
 prices = pull_prices_viz(tickers_str, "5y")
 
 #setting layout and title
-app.title = "ML Stock Trader"
+app.title = "Stock Prediction App"
 app.layout = html.Div(className='main-body', children=[
     #Top-left div
     html.Div(id='card-outer', className='card-outer', children=[
-        html.Div(id='card-1', className='card-input', children=[
+        html.Div(id='card-1', className='card-intro', children=[
+            html.H3(className='header', children="Stock Prediction App"),
+        ]),
+    
+        html.Div(id='card-2', className='card', children=[
             #header
-            html.H3(className='header',children="ML Stock Trader"),
+            html.H3(className='header',children="Inputs"),
 
-            #text box 2
+            #text box 1
+            html.Div(className='dropdown-title', children='Company Name:'),
             dcc.Dropdown(
                 id='company-name',
                 className='dropdown',
                 options=[{'label': i, 'value': i} for i in tickers.Name],
                 value=tickers.Name[0],
             ),
+            
+            html.Br(),
 
             #text box 2
-            html.Br(),
+            html.Div(className='dropdown-title', children='Graph Filter:'),
             dcc.Dropdown(
                 id='timeframe',
                 className='dropdown',
@@ -51,7 +58,7 @@ app.layout = html.Div(className='main-body', children=[
             )],
         ),
 
-        html.Div(id='card-2', className='card', children=[
+        html.Div(id='card-3', className='card', children=[
             html.H3(className='header', children="Stock Price Prediction"),
             html.Div(id='company-ticker', children='Ticker: AAPL',
                      style={'textAlign':'center'}),
@@ -60,9 +67,6 @@ app.layout = html.Div(className='main-body', children=[
                                                'textAlign':'center'}),
             html.Br(),
             html.Div(id="predicted-price"),
-        ]),
-        html.Div(id='card-3', className='card', children=[
-            html.H3(className='header', children="Sentiment Analysis"),
         ]),
     ]),
 
@@ -146,8 +150,8 @@ def show_prices(name):
         color = "white"
         
     #formatting strings to display
-    current_str = "Yesterday's Closing Price: ${:,.2f}".format(current_price)
-    predicted_str = "Today's Predicted Closing Price: ${:,.2f}".format(predicted_price)
+    current_str = "Yesterday's Closing Price:   ${:,.2f}".format(current_price)
+    predicted_str = "Today's Predicted Closing Price:   ${:,.2f}".format(predicted_price)
     predicted_style = {'color':color, 'textAlign':'center'}
     ticker_str = "Stock Ticker: \t{}".format(ticker)
     return current_str,predicted_str,predicted_style,ticker_str
