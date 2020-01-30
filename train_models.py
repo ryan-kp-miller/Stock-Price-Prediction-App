@@ -2,7 +2,6 @@
     trains a separate model on each of the first 5 stock ticker's prices for
     the last 5 years and saves them
 """
-import pickle
 import pandas as pd
 import datetime as dt
 from MLTrader import MLTrader
