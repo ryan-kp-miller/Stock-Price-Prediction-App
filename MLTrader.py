@@ -3,24 +3,25 @@ import numpy as np
 import yfinance as yf
 from indicators import *
 from sklearn.preprocessing import StandardScaler
+from dateutil.relativedelta import relativedelta
 import datetime as dt
 import pickle
 
 class MLTrader:
     """
-        class for making daily predictions of a given stock's price 
-    
+        class for making daily predictions of a given stock's price
+
         inputs:
             learner: ML object to be trained and used for prediction
                      must have fit(X,Y) and predict(X) methods
             impact:  float representing the assumed (and simplified) impact that
-                     a trade will have on the price of the stock                     
+                     a trade will have on the price of the stock
             n:       integer representing the length of the rollling windows for
                      generating the indictors
             kwargs:  dictionary containing the arguments to feed into the ML
-                     learner object            
+                     learner object
     """
-    
+
     def __init__(self, learner, impact = 0.0, n = 9, kwargs = {}):
         self.learner = learner(**kwargs)
         self.impact = impact
@@ -45,11 +46,14 @@ class MLTrader:
                 prices: dataframe containing the preprocessed daily price data
                         for the given stock
         """
+        #creating a list with the input symbol and "SPY" to pull in all days
+        #the stock market was open
+        symbols = [symbol, "SPY"]
+
         #reading in the stock data using util.py and removing nulls
-        df = yf.download(symbol, start=sd, end=ed,
-                         group_by="ticker", auto_adjust=True)
-        prices = df.filter(items=['Close'],axis=1)
-        prices.columns = [symbol]
+        df = yf.download(symbols, start=sd, end=ed, auto_adjust=True)
+        prices = df['Close'].filter(items=[symbol], axis=1)
+
         prices.fillna(method='ffill', inplace=True) #forward-filling missing prices
         prices.fillna(method='bfill', inplace=True) #back-filling missing prices
         return prices
@@ -77,10 +81,10 @@ class MLTrader:
         indicators_df = price_sma_df.join(bb_df,rsuffix="1") \
                                     .join(vol_df,rsuffix="2")
         indicators_df.columns = ["Price/SMA", "Bollinger Bands", "Volatility"]
-        
+
         #adding column for the closing price of one days prior
         indicators_df["Previous Price"] = prices.shift(1).values
-        
+
         return indicators_df
 
 
@@ -109,8 +113,7 @@ class MLTrader:
         return orders_df
 
 
-    def fit(self, symbol = "IBM", sd = "2008-01-01",
-                    ed = "2009-01-01", sv = 10000):
+    def fit(self, symbol = "IBM", sd = "2008-01-01", ed = "2009-01-01"):
         """
             method for training the given ML regressor object for predicting the
             normalized price of the given stock
@@ -119,9 +122,7 @@ class MLTrader:
                 symbol: string representing the stock symbol to trade
                 sd:     string representing the date to start trading
                 ed:     string representing the date to stop trading
-                sv:     integer representing the starting amount of money you
-                        have to trade with
-                        
+
             output:
                 None
         """
@@ -134,27 +135,60 @@ class MLTrader:
         #training regressor to predict prices using the indicators in indicators.py
         self.learner.fit(features_df.values, prices_norm.values)
 
-    
-    def save_learner(self, symbol = ""): 
+
+    def save_learner(self, symbol = ""):
         """
             method that saves the learner using pickle
-            assumes that the model is from scikit-learn 
+            assumes that the model is from scikit-learn
         """
-        pickle.dump(self.learner, open("{}_model.p".format(symbol), "wb"))
-        pickle.dump(self.ss, open("{}_ss.p".format(symbol), "wb"))
+        pickle.dump(self.learner, open("models/{}_model.p".format(symbol), "wb"))
+        pickle.dump(self.ss, open("models/{}_ss.p".format(symbol), "wb"))
 
-        
+
     def load_learner(self, symbol = ""):
         """
             method that loads the learner using pickle
-            assumes that the model was saved using save_learner method 
+            assumes that the model was saved using save_learner method
         """
-        self.learner = pickle.load(open("{}_model.p".format(symbol), "rb"))
-        self.ss = pickle.load(open("{}_ss.p".format(symbol), "rb"))
+        self.learner = pickle.load(open("models/{}_model.p".format(symbol), "rb"))
+        self.ss = pickle.load(open("models/{}_ss.p".format(symbol), "rb"))
 
 
-    def testLearner(self, symbol = "IBM", sd = "2009-01-01",
-                   ed = "2010-01-01", sv = 10000):
+    def predict_tomorrow(self, symbol):
+        """
+            method to predict the the adjusted close stock price
+
+            input:
+                symbol: string representing the stock symbol for trading
+
+            output:
+                price:  float representing tomorrow's predicted stock price
+                        for the given symbol
+        """
+        #finding the start_date based on the window-length
+        ed = dt.datetime.today()
+        sd = ed - relativedelta(days=self.n*2)
+
+        #reading in the prices data and normalizing it
+        prices = self.preprocess_data(symbol, sd, ed)
+        prices_norm = pd.DataFrame(self.ss.transform(prices),index=prices.index,
+                                   columns=[symbol])
+
+        #generating indicator dataframe for predicting
+        features_df = self.generate_indicators(prices_norm)
+        print(features_df.shape)
+
+        #removing the n days of blanks from prices and features_df
+        prices_norm = prices_norm.iloc[self.n:,:]
+        features_df = features_df.iloc[self.n:,:]
+
+        #predicting prices using Random Forest regressor
+        prices_array = self.learner.predict(features_df.values)
+        price = self.ss.inverse_transform(prices_array)[0,0]
+        return price
+
+
+    def testLearner(self, symbol = "IBM", sd = "2009-01-01", ed = "2010-01-01"):
         """
             method for using the trained ML regressor to create a dataframe of
             stock trades for the given time period and stock to be fed into the
@@ -164,31 +198,31 @@ class MLTrader:
                 symbol:    string representing the stock symbol to trade
                 sd:        string representing the date to start trading
                 ed:        string representing the date to stop trading
-                sv:        integer representing the starting amount of money you
-                           have to trade with
-                           
+
             output:
                 df_trades: pandas dataframe containing a trade (int) for each
                            trading day between sd and ed
         """
         #reading in the price data and normalizing it
         prices = self.preprocess_data(symbol, sd, ed)
-        prices_norm = pd.DataFrame(self.ss.transform(prices),index=prices.index, columns=[symbol])
-        
+        prices_norm = pd.DataFrame(self.ss.transform(prices),index=prices.index,
+                                   columns=[symbol])
+
         #generating indicator dataframe for predicting
         features_df = self.generate_indicators(prices_norm)
-        
+
         #removing the n days of blanks from prices and features_df
         prices_norm = prices_norm.iloc[self.n:,:]
-        features_df = features_df.iloc[self.n:,:] 
+        features_df = features_df.iloc[self.n:,:]
 
         #predicting prices using Random Forest regressor
         prices_array = self.learner.predict(features_df.values)
-        self.prices_pred = pd.DataFrame(prices_array,index=prices_norm.index.values, columns=[symbol])
+        self.prices_pred = pd.DataFrame(prices_array,  columns=[symbol],
+                                        index=prices_norm.index.values)
 
         #initializing df_trades to all 0s
         trades_df = pd.DataFrame(np.zeros((prices_array.shape[0], 1)),
-                                 index=self.prices_pred.index, 
+                                 index=self.prices_pred.index,
                                  columns = ['Trade'])
         trades_df.index.rename('Date', inplace=True)
 
@@ -212,11 +246,10 @@ class MLTrader:
                     self.bad_trades+=1
             elif self.prices_pred.iloc[i+1,0] < prices_norm.iloc[i,0]*(1-self.impact):  #price goes down
                 trades_df.iloc[i,0] = -1000 - current_holdings #sell as much as we can
-                current_holdings = -1000  #setting to current  
+                current_holdings = -1000  #setting to current
                 #counting the total number of trades for later comparison
                 self.trades+=1
                 #counting the number of times the learner shouldn't have traded
                 if prices_norm.iloc[i+1,0] > prices_norm.iloc[i,0]:
                     self.bad_trades+=1
         return trades_df
-
