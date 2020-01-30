@@ -4,8 +4,8 @@ import yfinance as yf
 from indicators import *
 from sklearn.preprocessing import StandardScaler
 from dateutil.relativedelta import relativedelta
+from joblib import dump,load
 import datetime as dt
-import pickle
 
 class MLTrader:
     """
@@ -141,8 +141,8 @@ class MLTrader:
             method that saves the learner using pickle
             assumes that the model is from scikit-learn
         """
-        pickle.dump(self.learner, open("models/{}_model.p".format(symbol), "wb"))
-        pickle.dump(self.ss, open("models/{}_ss.p".format(symbol), "wb"))
+        dump(self.learner, "models/{}_model.joblib".format(symbol))
+        dump(self.ss, "models/{}_ss.joblib".format(symbol))
 
 
     def load_learner(self, symbol = ""):
@@ -150,8 +150,8 @@ class MLTrader:
             method that loads the learner using pickle
             assumes that the model was saved using save_learner method
         """
-        self.learner = pickle.load(open("models/{}_model.p".format(symbol), "rb"))
-        self.ss = pickle.load(open("models/{}_ss.p".format(symbol), "rb"))
+        self.learner = load("models/{}_model.joblib".format(symbol))
+        self.ss = load("models/{}_ss.joblib".format(symbol))
 
 
     def predict_tomorrow(self, symbol):
