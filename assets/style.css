@@ -17,10 +17,10 @@ body
 
 .card
 {
-    width : 30%;
+    width : 35%;
     height : 100%;
     color : white;
-    margin : 5%;
+    margin : 1%;
     padding: 2%;
     display: table-cell;
     background-color : #30333d;
