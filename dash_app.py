@@ -48,16 +48,14 @@ app.layout = html.Div(className='main-body', children=[
                 options=[{'label': i, 'value': i} for i in periods_list],
                 value="5 Years",
                 multi=False,
-            ),
-
-            html.Br(),
-            html.Div(id='company-ticker', children='Ticker: AAPL',
-                     style={'textAlign':'center'}),
-            ],
+            )],
         ),
 
         html.Div(id='card-2', className='card', children=[
             html.H3(className='header', children="Stock Price Prediction"),
+            html.Div(id='company-ticker', children='Ticker: AAPL',
+                     style={'textAlign':'center'}),
+            html.Br(),
             html.Div(id="current-price",style={'color':'white',
                                                'textAlign':'center'}),
             html.Br(),
@@ -77,8 +75,7 @@ app.layout = html.Div(className='main-body', children=[
 )
 
 @app.callback(
-    [Output('prices-plot', 'figure'),
-     Output('company-ticker', 'children')],
+    Output('prices-plot', 'figure'),
     [Input('company-name', 'value'),
      Input('timeframe', 'value')]
 )
@@ -118,16 +115,14 @@ def create_plot(name, timeframe):
                          yaxis={'showgrid': False, 'color':'white',
                                 'title':'Stock Price'},
                          height=350)
-
-    #creating Company Name string
-    company_name = tickers[tickers.Symbol == ticker].Name.values[0]
-    return fig, "Stock Ticker: \t{}".format(ticker)
+    return fig
 
 
 @app.callback(
     [Output('current-price', 'children'),
      Output('predicted-price', 'children'),
-     Output('predicted-price', 'style')],
+     Output('predicted-price', 'style'),
+     Output('company-ticker', 'children')],
     [Input('company-name', 'value')]
 )
 def show_prices(name):
@@ -149,11 +144,13 @@ def show_prices(name):
         color = "red"
     else:
         color = "white"
-
+        
+    #formatting strings to display
     current_str = "Yesterday's Closing Price: ${:,.2f}".format(current_price)
     predicted_str = "Today's Predicted Closing Price: ${:,.2f}".format(predicted_price)
     predicted_style = {'color':color, 'textAlign':'center'}
-    return current_str,predicted_str,predicted_style
+    ticker_str = "Stock Ticker: \t{}".format(ticker)
+    return current_str,predicted_str,predicted_style,ticker_str
 
 
 if __name__ == "__main__":
