@@ -1,5 +1,6 @@
 #importing dependencies
 import pandas as pd
+import numpy as np
 
 def price_sma_ratio(prices, n):
     """
@@ -35,11 +36,12 @@ def bollinger_bands(prices, n):
             bb:       dataframe containing the normalized boelinger
                       band % of the given stocks for each trading day
     """
-    sma = prices.rolling(window=n, min_periods=n).mean()
-    rolling_std = prices.rolling(window=n, min_periods=n).std()
+    sma = prices.rolling(window=n, min_periods=n).mean().dropna()
+    rolling_std = prices.rolling(window=n, min_periods=n).std().dropna()
     top_band = sma + 2*rolling_std
     bottom_band = sma - 2*rolling_std
-    bb = (prices - bottom_band) / (top_band - bottom_band)
+    bb = (prices.iloc[n:,:] - bottom_band) / (top_band - bottom_band)
+    bb = bb.replace([np.inf, -np.inf], np.nan).dropna() #replacing inf with NaN and dropping rows with NaN's
     bb = (bb - bb.mean()) / bb.std()  #normalizing the indicator
     return bb
 
