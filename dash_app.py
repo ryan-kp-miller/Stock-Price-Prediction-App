@@ -30,6 +30,14 @@ app.layout = html.Div(className='main-body', children=[
     html.Div(id='card-outer', className='card-outer', children=[
         html.Div(id='card-1', className='card-intro', children=[
             html.H3(className='header', children="Stock Prediction App"),
+            dcc.Markdown(className='intro', children="""
+                This app is designed to show you the adjusted closing stock 
+                prices of a few different technology companies. Select the
+                company you want to see, and the chart below will show it's 
+                stock price over the last five years. In the top-right corner of
+                the screen, the company's stock ticker, adjusted closing price 
+                from yesterday, and the predicted closing price for today.                          
+            """)
         ]),
     
         html.Div(id='card-2', className='card', children=[
@@ -69,8 +77,6 @@ app.layout = html.Div(className='main-body', children=[
             html.Div(id="predicted-price"),
         ]),
     ]),
-
-    html.Br(),
 
     html.Div(id='prices-div', style={'height':'50vh'},
              children=dcc.Graph(id='prices-plot', style={'height':'inherit'},
