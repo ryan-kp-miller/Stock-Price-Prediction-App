@@ -9,7 +9,7 @@ import pandas as pd
 import datetime as dt
 import yfinance as yf
 from MLTrader import MLTrader
-from market_simulator import pull_prices_viz
+from util import pull_prices_viz
 from dateutil.relativedelta import relativedelta
 
 app = dash.Dash(name=__name__)
