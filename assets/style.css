@@ -5,50 +5,81 @@ body
 
 h5
 {
-    height : 3%;    
+    height : 3%;
 }
 
+.main-body
+{
+    margin : 0 auto;
+    width : 95%;
+}
 
 .title-div
 {
-    width : 80%;
-    height : 10%;
+    width : 95%;
+    height : 5%;
     color : white;
     margin : 0 auto;
-    padding: 2%;
-    background-color : #0a2863;
+    margin-top: 0;
+    padding-bottom : 1%;
 }
 
-.lower-body
+.title
 {
-    display : table;
+    vertical-align : top;
+    text-align : left;
+    margin : 0px;
+    font : "Open Sans";
+    font-size : 35px;
+    color : white;
+    /* height : 8%; */
 }
 
-
-.card-left
+.intro
 {
-    width : 20%;
-    height : 100%;
+    vertical-align : top;
+    text-align : left;
+    font : "Open Sans";
+    font-size : 18px;
+    color : white;
+}
+
+.card-outer
+{
+    width : 90%;
+    height : 40%;
     padding: 10px;
     color : white;
-    margin : 0 auto;
-    display: table-cell;
+    margin : 10px;
+    /* margin : 0 auto; */
+    /* margin : 15%; */
+    display : table;
     vertical-align : top;
     border-spacing: 10px;
     border-collapse: separate;
-    background-color : #0a2863;
 }
 
-.card-prices
+.card
 {
-    width : 50vh;
+  display : table-cell;
+  color : white;
+  padding : 15px;
+  border: 5px solid transparent;
+  border-color : #061E44;
+  width : 12%;
+  background-color : #0a2863;
+}
+
+.graph
+{
+    width : 90%;
     height : 100%;
-    color : white;
-    padding: 10px;
     margin : 0 auto;
-    display: table-cell;
-    border-collapse: separate;
-    background-color : #0a2863;
+    vertical-align: center;
+    margin-right: 15px;
+    align-items: center;
+    margin : auto;
+    vertical-align : top;
 }
 
 .header
@@ -66,22 +97,23 @@ h5
     vertical-align : top;
     text-align : center;
     font : "Open Sans";
+    font-size : 18px;
+    color : white;
+}
+
+.values
+{
+    vertical-align : top;
+    text-align : center;
+    font : "Open Sans";
+    font-size : 25px;
     color : white;
 }
 
 .dropdown
 {
     vertical-align : top;
-    width : 80%;
+    width : 70%;
     color : black;
-    margin : 0 auto;
-}
-
-.dropdown-title
-{
-    vertical-align : top;
-    width : 80%;
-    color : white;
-    text-align : left;
     margin : 0 auto;
 }

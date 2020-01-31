@@ -24,57 +24,66 @@ tickers_str = ' '.join(tickers.Symbol.values)
 prices = pull_prices_viz(tickers_str, "5y")
 
 #setting layout and title
-app.title = "Stock Prediction App"
+app.title = "Stock Price Prediction App"
 app.layout = html.Div(className='main-body', children=[
     #intro section on top
     html.Div(id='title', className='title-div', children=[
-        html.H3(className='title', children="Stock Prediction App"),
+        html.H3(className='title', children="Stock Price Prediction App"),
         dcc.Markdown(className='intro', children="""
-            This app is designed to show you the last five years' adjusted 
-            closing stock prices of a few different technology companies and 
-            predict the closing price for today. Play around and make some money!                          
+            This app shows you the adjusted closing stock prices for a few
+            different technology companies and predict the closing price for
+            today. Play around, and make some money!
         """)
     ]),
-    html.Div(className='lower-body',children=[
-        #Top-left div
-        html.Div(id='card-left', className='card-left', children=[
-                #header
-                html.H3(className='header',children="Inputs"),
 
-                #text box 1
-                html.Div(className='dropdown-title', children='Company Name:'),
-                dcc.Dropdown(
-                    id='company-name',
-                    className='dropdown',
-                    options=[{'label': i, 'value': i} for i in tickers.Name],
-                    value=tickers.Name[0],
-                ),
-                
-                html.Br(),
+    #Top div
+    html.Div(id='card-left', className='card-left', children=[
+        html.Div(className='card', children=[
+            html.Div(className='labels', children='Company Name:'),
+            html.Br(),
+            dcc.Dropdown(
+                id='company-name',
+                className='dropdown',
+                options=[{'label': i, 'value': i} for i in tickers.Name],
+                value=tickers.Name[0],
+            ),
+        ]),
 
-                #text box 2
-                html.Div(className='dropdown-title', children='Graph Filter:'),
-                dcc.Dropdown(
-                    id='timeframe',
-                    className='dropdown',
-                    options=[{'label': i, 'value': i} for i in periods_list],
-                    value="5 Years",
-                    multi=False,
-                ),
+        html.Div(className='card', children=[
+            html.Div(className='labels', children='Graph Filter:'),
+            html.Br(),
+            dcc.Dropdown(
+                id='timeframe',
+                className='dropdown',
+                options=[{'label': i, 'value': i} for i in periods_list],
+                value="5 Years",
+                multi=False,
+            ),
+        ]),
 
-                html.H3(className='header', children="Stock Price Prediction"),
-                html.Div(className='labels', id='company-ticker', 
-                         children='Ticker: AAPL'),
-                html.Br(),
-                html.Div(className='labels', id="current-price"),
-                html.Br(),
-                html.Div(className='labels', id="predicted-price"),
-            ]),
+        html.Div(className='card', children=[
+            html.Div(className='labels', children="Stock Ticker:"),
+            html.Br(),
+            html.Div(className='values', id='company-ticker', children='Ticker: AAPL'),
+        ]),
 
-        html.Div(className='card-prices', id='prices-div',
-                 children=dcc.Graph(id='prices-plot', style={'width':'100%'},
-                                    config={'responsive':True})),
+        html.Div(className='card', children=[
+            html.Div(className='labels', children="Yesterday's Closing Price:"),
+            html.Br(),
+            html.Div(id="current-price", className='values'),
+        ]),
+
+        html.Div(className='card', children=[
+            html.Div(className='labels', children="Today's Predicted Closing Price:"),
+            html.Br(),
+            html.Div(id="predicted-price", className='values'),
+        ]),
     ]),
+
+    html.Br(),
+    html.Div(className='graph', id='prices-div',
+             children=dcc.Graph(id='prices-plot', style={'width':'100%'},
+                                config={'responsive':True})),
 ])
 
 @app.callback(
@@ -117,7 +126,7 @@ def create_plot(name, timeframe):
                          xaxis={'showgrid': False, 'color':'white'},
                          yaxis={'showgrid': False, 'color':'white',
                                 'title':'Stock Price'},
-                         height=350)
+                         height=400)
     return fig
 
 
@@ -147,13 +156,13 @@ def show_prices(name):
         color = "red"
     else:
         color = "white"
-        
+
     #formatting strings to display
-    current_str = "Yesterday's Closing Price:   ${:,.2f}".format(current_price)
-    predicted_str = "Today's Predicted Closing Price:   ${:,.2f}".format(predicted_price)
+    current_str = "${:,.2f}".format(current_price)
+    predicted_str = "${:,.2f}".format(predicted_price)
     predicted_style = {'color':color, 'textAlign':'center'}
-    ticker_str = "Stock Ticker: \t{}".format(ticker)
-    return current_str,predicted_str,predicted_style,ticker_str
+
+    return current_str,predicted_str,predicted_style,ticker
 
 
 if __name__ == "__main__":
