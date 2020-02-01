@@ -21,8 +21,11 @@ python example_script.py
 
 ### Installing
 
+After cloning the repository, navigate to the folder, create and activate a virtual environment, and install the required packages in the requirements.txt file. 
+
 For Windows machines:
 ```
+cd path/to/repo/folder
 python -m venv env
 cd env/scripts
 activate
