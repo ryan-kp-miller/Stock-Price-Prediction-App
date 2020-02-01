@@ -1,5 +1,4 @@
 __pycache__
-*.png
 .ipynb_checkpoints
 env
 models

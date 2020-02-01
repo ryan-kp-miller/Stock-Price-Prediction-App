@@ -1,14 +1,18 @@
 # Stock Price Prediction App
 
-This app is designed to display the stock prices of the last 5 years for a few 
+This app is designed to display the stock prices of the last 5 years for a few
 different technology companies. It also uses machine learning to predict today's
 closing stock price for each of the companies.
+
+
+[screenshot](assets/example.PNG)
+
 
 ## Getting Started
 
 ### Prerequisites
 
-You need to have Python installed on your computer and be able to run python 
+You need to have Python installed on your computer and be able to run python
 scripts through your terminal.
 
 ```
@@ -28,8 +32,8 @@ python -m pip install -r requirements.txt
 
 ### Running the App
 
-Before you can run the web app, you need to first train the machine learning 
-models (should take less than a minute). If you do not train the models first, 
+Before you can run the web app, you need to first train the machine learning
+models (should take less than a minute). If you do not train the models first,
 the dash_app.py script will error out. Running this script will train a machine
 learning model for each of the companies and save the model and StandardScaler
 object into a models folder in the current working directory.
