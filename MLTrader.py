@@ -138,7 +138,7 @@ class MLTrader:
 
     def save_learner(self, symbol = ""):
         """
-            method that saves the learner using pickle
+            method that saves the learner using joblib
             assumes that the model is from scikit-learn
         """
         dump(self.learner, "models/{}_model.joblib".format(symbol))
@@ -147,7 +147,7 @@ class MLTrader:
 
     def load_learner(self, symbol = ""):
         """
-            method that loads the learner using pickle
+            method that loads the learner using joblib
             assumes that the model was saved using save_learner method
         """
         self.learner = load("models/{}_model.joblib".format(symbol))
