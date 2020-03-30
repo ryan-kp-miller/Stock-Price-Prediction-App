@@ -21,7 +21,7 @@ python example_script.py
 
 ### Installing
 
-After cloning the repository, navigate to the folder, create and activate a virtual environment, and install the required packages in the requirements.txt file. 
+After cloning the repository, navigate to the folder, create and activate a virtual environment, and install the required packages in the requirements.txt file.
 
 For Windows machines:
 ```
@@ -56,7 +56,7 @@ python dash_app.py
 
 * [Plotly](https://plot.ly/python/plotly-express/) - The framework used to build the chart
 * [Dash](https://plot.ly/dash/) - The framework used to build the web app
-* [Scikit-Learn](https://scikit-learn.org/stable/) - The framework used to building the machine learning models
+* [Scikit-Learn](https://scikit-learn.org/stable/) - The framework used to build the machine learning models
 * [yfinance](https://pypi.org/project/yfinance/) - The API used to pull the stock price data from Yahoo! Finance
 
 ## Author
