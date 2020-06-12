@@ -61,7 +61,9 @@ python dash_app.py
 
 ## Author
 
-* **Ryan Miller** - [Portfolio](https://ryan-kp-miller.github.io/)
+* **Ryan Miller**
+- Portfolio: https://ryan-kp-miller.github.io/  
+- Email: ryan.kp.miller@gmail.com
 
 <!-- ## License
 
