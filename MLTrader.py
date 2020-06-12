@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from dateutil.relativedelta import relativedelta
 from joblib import dump,load
 import datetime as dt
+import os
 
 class MLTrader:
     """
@@ -141,8 +142,14 @@ class MLTrader:
             method that saves the learner using joblib
             assumes that the model is from scikit-learn
         """
-        dump(self.learner, "models/{}_model.joblib".format(symbol))
-        dump(self.ss, "models/{}_ss.joblib".format(symbol))
+        #creating models folder if it doesn't already exist
+        folder_path = os.path.join(os.getcwd(), "models")
+        if not os.path.isdir(folder_path):
+             os.mkdir(folder_path)
+
+        #dumping the ML model and StandardScaler objects into the models folder
+        dump(self.learner, os.path.join(folder_path, "{}_model.joblib".format(symbol)))
+        dump(self.ss, os.path.join(folder_path, "{}_ss.joblib".format(symbol)))
 
 
     def load_learner(self, symbol = ""):
@@ -165,7 +172,7 @@ class MLTrader:
                 price:  float representing today's predicted closing stock price
                         for the given symbol
         """
-        #finding the start_date based on the 2*window-length to account for 
+        #finding the start_date based on the 2*window-length to account for
         #days the market isn't open
         ed = dt.datetime.today() - relativedelta(days=1)
         sd = ed - relativedelta(days=self.n*2)
